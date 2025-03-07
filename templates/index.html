@@ -26,7 +26,7 @@
         <!-- main heading -->
         <div class="text-center mb-4">
           <h1>MI Prediction Model</h1>
-          <p class="text-muted">enter the details below to predict mi risk.</p>
+          <p class="text-muted">Enter the details below to predict Myocardial Infarction risk.</p>
         </div>
 
         <!-- if there's an error, we'll show a quick alert -->
@@ -40,25 +40,25 @@
         {% if submitted %}
           <div class="card shadow-sm">
             <div class="card-body">
-              <h3 class="card-title">results</h3>
+              <h3 class="card-title">Results</h3>
               <hr>
               <p><strong>MI Risk:</strong> {{ prediction }}</p>
               <p><strong>Probability of MI:</strong> {{ probability }}</p>
               <hr>
-              <a href="/" class="btn btn-primary w-100">try another input</a>
+              <a href="/" class="btn btn-primary w-100">Try another input</a>
             </div>
           </div>
         {% else %}
           <div class="card shadow-sm">
             <div class="card-body">
-              <h3 class="card-title">patient information</h3>
+              <h3 class="card-title">Patient Information</h3>
               <hr>
 
               <form method="POST">
                 <!-- input for ca_0.0 -->
                 <div class="mb-3">
                   <label for="ca_0_0" class="form-label">
-                    major vessels colored by fluoroscopy (ca_0.0)
+                    Major vessels colored by fluoroscopy (ca_0.0)
                   </label>
                   <input 
                     type="number" 
@@ -74,7 +74,7 @@
                 <!-- input for thal_7.0 -->
                 <div class="mb-3">
                   <label for="thal_7_0" class="form-label">
-                    reversible thalassemia defect (thal_7.0)
+                    Reversible Thalassemia defect (thal_7.0)
                   </label>
                   <input 
                     type="number" 
@@ -90,7 +90,7 @@
                 <!-- input for cp_4.0 -->
                 <div class="mb-3">
                   <label for="cp_4_0" class="form-label">
-                    chest pain type 4 (cp_4.0)
+                    Chest pain type 4 (cp_4.0)
                   </label>
                   <input 
                     type="number" 
@@ -106,7 +106,7 @@
                 <!-- input for asymptomatic_chest_pain -->
                 <div class="mb-3">
                   <label for="asymptomatic_chest_pain" class="form-label">
-                    asymptomatic chest pain (asymptomatic_chest_pain)
+                    Asymptomatic chest pain (asymptomatic_chest_pain)
                   </label>
                   <input 
                     type="number" 
@@ -122,7 +122,7 @@
                 <!-- input for age_sex -->
                 <div class="mb-3">
                   <label for="age_sex" class="form-label">
-                    age-sex interaction (age_sex)
+                    Age-sex interaction (age_sex)
                   </label>
                   <input 
                     type="number" 
@@ -138,7 +138,7 @@
                 <!-- input for combined_risk_score -->
                 <div class="mb-3">
                   <label for="combined_risk_score" class="form-label">
-                    combined risk score (combined_risk_score)
+                    Combined risk score (combined_risk_score)
                   </label>
                   <input 
                     type="number" 
@@ -154,7 +154,7 @@
                 <!-- input for oldpeak -->
                 <div class="mb-3">
                   <label for="oldpeak" class="form-label">
-                    st depression (oldpeak)
+                    St depression (oldpeak)
                   </label>
                   <input 
                     type="number" 
@@ -170,7 +170,7 @@
                 <!-- input for thalach -->
                 <div class="mb-3">
                   <label for="thalach" class="form-label">
-                    maximum heart rate (thalach)
+                    Maximum heart rate (thalach)
                   </label>
                   <input 
                     type="number" 
@@ -186,7 +186,7 @@
                 <!-- input for thalach_exang -->
                 <div class="mb-3">
                   <label for="thalach_exang" class="form-label">
-                    hr x exercise-induced angina (thalach_exang)
+                    Hour x Exercise-induced Angina (thalach_exang)
                   </label>
                   <input 
                     type="number" 
@@ -202,7 +202,7 @@
                 <!-- input for thal_3.0 -->
                 <div class="mb-3">
                   <label for="thal_3_0" class="form-label">
-                    normal thalassemia status (thal_3.0)
+                    Normal Thalassemia status (thal_3.0)
                   </label>
                   <input 
                     type="number" 
@@ -216,7 +216,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">
-                  predict
+                  Predict
                 </button>
               </form>
             </div>
