@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MI Prediction Model</title>
+  <title>Myocardial Infarction Risk Predictor</title>
   <!-- using bootstrap for styling -->
   <link
     rel="stylesheet"
@@ -15,7 +15,7 @@
   <!-- super simple navbar at the top -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
-      <a class="navbar-brand" href="/">MI Predictor</a>
+      <a class="navbar-brand" href="/">Myocardial Infarction Risk Predictor</a>
     </div>
   </nav>
 
@@ -25,8 +25,9 @@
         
         <!-- main heading -->
         <div class="text-center mb-4">
-          <h1>MI Prediction Model</h1>
-          <p class="text-muted">Enter the details below to predict Myocardial Infarction risk.</p>
+          <h1>Myocardial Infarction Risk Predictor</h1>
+          <p class="text-muted">Enter the details below to assess your risk of Myocardial Infarction (MI)</p>
+          <p class="text-muted small">Note: This tool is for informational purposes only and should not replace professional medical advice.</p>
         </div>
 
         <!-- if there's an error, we'll show a quick alert -->
@@ -42,23 +43,39 @@
             <div class="card-body">
               <h3 class="card-title">Results</h3>
               <hr>
-              <p><strong>MI Risk:</strong> {{ prediction }}</p>
-              <p><strong>Probability of MI:</strong> {{ probability }}</p>
+              <p>
+                <strong>MI Risk Level:</strong> 
+                <span class="result-value {% if prediction == 'High Risk' %}high-risk{% else %}low-risk{% endif %}">
+                  {{ prediction }}
+                </span>
+              </p>
+              <p>
+                <strong>MI Probability:</strong> 
+                <span class="result-value">{{ probability }}</span>
+              </p>
+              
+              <div class="alert alert-info mt-3">
+                <p class="mb-0"><strong>Understanding Your Results:</strong></p>
+                <p class="mb-0">The MI (Myocardial Infarction) probability indicates your risk level. A higher probability means a greater likelihood of experiencing a heart attack. For example, a probability of 75% indicates a higher risk than 25%.</p>
+                <p class="mb-0 mt-2">Please consult with a healthcare provider to properly interpret these results and discuss appropriate preventive measures.</p>
+              </div>
+              
               <hr>
-              <a href="/" class="btn btn-primary w-100">Try another input</a>
+              <a href="/" class="btn btn-primary w-100">Make Another Prediction</a>
             </div>
           </div>
         {% else %}
           <div class="card shadow-sm">
             <div class="card-body">
               <h3 class="card-title">Patient Information</h3>
+              <p class="text-muted">All fields are required. Enter values as provided by your medical tests.</p>
               <hr>
 
               <form method="POST">
                 <!-- input for ca_0.0 -->
                 <div class="mb-3">
                   <label for="ca_0_0" class="form-label">
-                    Major vessels colored by fluoroscopy (ca_0.0)
+                    Number of Major Vessels (0-3)
                   </label>
                   <input 
                     type="number" 
@@ -69,12 +86,13 @@
                     placeholder="e.g., 1.0" 
                     required
                   >
+                  <div class="form-text">The number of major blood vessels colored by fluoroscopy. A value between 0 and 3.</div>
                 </div>
 
                 <!-- input for thal_7.0 -->
                 <div class="mb-3">
                   <label for="thal_7_0" class="form-label">
-                    Reversible Thalassemia defect (thal_7.0)
+                    Reversible Defect (Thalassemia)
                   </label>
                   <input 
                     type="number" 
@@ -82,15 +100,16 @@
                     class="form-control" 
                     name="thal_7_0" 
                     id="thal_7_0" 
-                    placeholder="e.g., 0.0" 
+                    placeholder="e.g., 0.0 or 1.0" 
                     required
                   >
+                  <div class="form-text">Indicates presence (1.0) or absence (0.0) of reversible defect in the heart's blood flow.</div>
                 </div>
 
                 <!-- input for cp_4.0 -->
                 <div class="mb-3">
                   <label for="cp_4_0" class="form-label">
-                    Chest pain type 4 (cp_4.0)
+                    Chest Pain Type
                   </label>
                   <input 
                     type="number" 
@@ -98,15 +117,16 @@
                     class="form-control" 
                     name="cp_4_0" 
                     id="cp_4_0" 
-                    placeholder="e.g., 0.0" 
+                    placeholder="e.g., 0.0 or 1.0" 
                     required
                   >
+                  <div class="form-text">Indicates presence (1.0) or absence (0.0) of type 4 chest pain.</div>
                 </div>
 
                 <!-- input for asymptomatic_chest_pain -->
                 <div class="mb-3">
                   <label for="asymptomatic_chest_pain" class="form-label">
-                    Asymptomatic chest pain (asymptomatic_chest_pain)
+                    Asymptomatic Chest Pain
                   </label>
                   <input 
                     type="number" 
@@ -114,15 +134,16 @@
                     class="form-control" 
                     name="asymptomatic_chest_pain" 
                     id="asymptomatic_chest_pain" 
-                    placeholder="e.g., 0.0" 
+                    placeholder="e.g., 0.0 or 1.0" 
                     required
                   >
+                  <div class="form-text">Indicates presence (1.0) or absence (0.0) of chest pain without apparent symptoms.</div>
                 </div>
 
                 <!-- input for age_sex -->
                 <div class="mb-3">
                   <label for="age_sex" class="form-label">
-                    Age-sex interaction (age_sex)
+                    Age-Sex Factor
                   </label>
                   <input 
                     type="number" 
@@ -133,12 +154,13 @@
                     placeholder="e.g., 43" 
                     required
                   >
+                  <div class="form-text">A combined score based on age and sex, typically calculated by your healthcare provider.</div>
                 </div>
 
                 <!-- input for combined_risk_score -->
                 <div class="mb-3">
                   <label for="combined_risk_score" class="form-label">
-                    Combined risk score (combined_risk_score)
+                    Combined Risk Score
                   </label>
                   <input 
                     type="number" 
@@ -149,12 +171,13 @@
                     placeholder="e.g., 2.5" 
                     required
                   >
+                  <div class="form-text">An overall risk score combining multiple factors, provided by your healthcare provider.</div>
                 </div>
 
                 <!-- input for oldpeak -->
                 <div class="mb-3">
                   <label for="oldpeak" class="form-label">
-                    St depression (oldpeak)
+                    ST Depression (Oldpeak)
                   </label>
                   <input 
                     type="number" 
@@ -165,12 +188,13 @@
                     placeholder="e.g., 1.2" 
                     required
                   >
+                  <div class="form-text">ST depression induced by exercise relative to rest, measured in millimeters.</div>
                 </div>
 
                 <!-- input for thalach -->
                 <div class="mb-3">
                   <label for="thalach" class="form-label">
-                    Maximum heart rate (thalach)
+                    Maximum Heart Rate
                   </label>
                   <input 
                     type="number" 
@@ -181,12 +205,13 @@
                     placeholder="e.g., 150.0" 
                     required
                   >
+                  <div class="form-text">Maximum heart rate achieved during exercise, measured in beats per minute.</div>
                 </div>
 
                 <!-- input for thalach_exang -->
                 <div class="mb-3">
                   <label for="thalach_exang" class="form-label">
-                    Hour x Exercise-induced Angina (thalach_exang)
+                    Exercise Angina Factor
                   </label>
                   <input 
                     type="number" 
@@ -197,12 +222,13 @@
                     placeholder="e.g., 0.0" 
                     required
                   >
+                  <div class="form-text">A score combining maximum heart rate and exercise-induced chest pain.</div>
                 </div>
 
                 <!-- input for thal_3.0 -->
                 <div class="mb-3">
                   <label for="thal_3_0" class="form-label">
-                    Normal Thalassemia status (thal_3.0)
+                    Normal Blood Flow
                   </label>
                   <input 
                     type="number" 
@@ -213,10 +239,15 @@
                     placeholder="e.g., 1.0" 
                     required
                   >
+                  <div class="form-text">Indicates normal blood flow (1.0) or abnormal blood flow (0.0) in thalassemia test.</div>
+                </div>
+
+                <div class="alert alert-warning mb-3">
+                  <p class="mb-0"><strong>Important Note:</strong> This tool provides an estimate based on available data. Always consult healthcare professionals for proper medical evaluation and advice.</p>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">
-                  Predict
+                  Calculate Risk
                 </button>
               </form>
             </div>

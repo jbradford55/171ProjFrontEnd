@@ -5,7 +5,7 @@ import numpy as np
 app = Flask(__name__)
 
 # loading model
-model = joblib.load("/Users/jimmybradford/Downloads/mi_best_model.pkl")
+model = joblib.load("mi_best_model.pkl")
 
 FEATURE_NAMES = [
     'ca_0.0', 'thal_7.0', 'cp_4.0', 'asymptomatic_chest_pain',
@@ -36,8 +36,8 @@ def predict():
             prediction = model.predict(sample)[0]
             probability = model.predict_proba(sample)[0, 1]
 
-            # convert numeric prediction to a more human-friendly string
-            mi_risk = "Yes" if prediction == 1 else "No"
+            # More detailed risk assessment
+            mi_risk = "High Risk" if prediction == 1 else "Low Risk"
             prob_percentage = f"{probability:.2%}"
 
             return render_template(
@@ -50,7 +50,7 @@ def predict():
             print(e)
             return render_template(
                 "index.html",
-                error="Error: Could not process input. Please ensure all fields are numeric."
+                error="Error: Please ensure all fields contain valid numerical values and try again."
             )
 
     # if GET, just render the blank form
