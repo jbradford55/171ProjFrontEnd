@@ -19,14 +19,18 @@ def predict():
         try:
             # grabbing form data
             ca_0_0 = float(request.form.get("ca_0_0", 0.0))
+            
+            # Handle radio button values
             thal_7_0 = float(request.form.get("thal_7_0", 0.0))
             cp_4_0 = float(request.form.get("cp_4_0", 0.0))
             asymptomatic_chest_pain = float(request.form.get("asymptomatic_chest_pain", 0.0))
+            
             age_sex = float(request.form.get("age_sex", 0.0))
             combined_risk_score = float(request.form.get("combined_risk_score", 0.0))
             oldpeak = float(request.form.get("oldpeak", 0.0))
             thalach = float(request.form.get("thalach", 0.0))
             thalach_exang = float(request.form.get("thalach_exang", 0.0))
+            
             thal_3_0 = float(request.form.get("thal_3_0", 0.0))
 
             # making prediction
@@ -50,6 +54,7 @@ def predict():
             print(e)
             return render_template(
                 "index.html",
+                submitted=False,
                 error="Error: Please ensure all fields contain valid numerical values and try again."
             )
 
