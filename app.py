@@ -1,49 +1,114 @@
 from flask import Flask, request, render_template
 import joblib
+import pandas as pd
 import numpy as np
+
+# -----------------------------------------------------
+# Copy the engineer_features function here (or import it)
+# -----------------------------------------------------
+def engineer_features(df):
+    df_out = df.copy()
+    df_out['age_over_55'] = (df_out['age'] >= 55).astype(int)
+    df_out['asymptomatic_chest_pain'] = (df_out['cp'] == 4).astype(int)
+    df_out['typical_angina'] = (df_out['cp'] == 1).astype(int)
+    df_out['hypertension'] = (df_out['trestbps'] >= 140).astype(int)
+    df_out['high_cholesterol'] = (df_out['chol'] > 240).astype(int)
+    df_out['borderline_cholesterol'] = (
+        (df_out['chol'] > 200) & (df_out['chol'] <= 240)
+    ).astype(int)
+    df_out['low_max_hr'] = (df_out['thalach'] < 150).astype(int)
+    df_out['exercise_angina_risk'] = df_out['exang']
+    df_out['significant_st_depression'] = (df_out['oldpeak'] > 1.5).astype(int)
+    df_out['flat_st_slope'] = (df_out['slope'] == 2).astype(int)
+    df_out['downsloping_st'] = (df_out['slope'] == 3).astype(int)
+    df_out['age_sex'] = df_out['age'] * df_out['sex']
+    df_out['thalach_exang'] = df_out['thalach'] * (1 - df_out['exang'])
+    df_out['combined_risk_score'] = (
+        df_out['age_over_55'] +
+        df_out['hypertension'] +
+        df_out['high_cholesterol'] +
+        df_out['fbs'] +
+        df_out['exercise_angina_risk'] +
+        df_out['significant_st_depression']
+    )
+    return df_out
 
 app = Flask(__name__)
 
-# loading model
-model = joblib.load("mi_best_model.pkl")
+# Load your complete model dictionary
+model_dict = joblib.load("mi_complete_model.pkl")
 
-FEATURE_NAMES = [
-    'ca_0.0', 'thal_7.0', 'cp_4.0', 'asymptomatic_chest_pain',
-    'age_sex', 'combined_risk_score', 'oldpeak', 'thalach',
-    'thalach_exang', 'thal_3.0'
-]
+# Extract items
+model = model_dict["model"]           # e.g., LogisticRegression
+preprocessor = model_dict["preprocessor"]  # e.g., StandardScaler or ColumnTransformer
+selector = model_dict["selector"]          # e.g., SelectKBest
+feature_names = model_dict["feature_names"] # raw feature names or final selected features
+print("[DEBUG] Loaded model:", type(model))
+print("[DEBUG] Loaded preprocessor:", type(preprocessor))
+print("[DEBUG] Loaded selector:", type(selector))
+print("[DEBUG] Feature names:", feature_names)
 
 @app.route("/", methods=["GET", "POST"])
 def predict():
     if request.method == "POST":
         try:
-            # grabbing form data
-            ca_0_0 = float(request.form.get("ca_0_0", 0.0))
-            
-            # Handle radio button values
-            thal_7_0 = float(request.form.get("thal_7_0", 0.0))
-            cp_4_0 = float(request.form.get("cp_4_0", 0.0))
-            asymptomatic_chest_pain = float(request.form.get("asymptomatic_chest_pain", 0.0))
-            
-            age_sex = float(request.form.get("age_sex", 0.0))
-            combined_risk_score = float(request.form.get("combined_risk_score", 0.0))
-            oldpeak = float(request.form.get("oldpeak", 0.0))
+            # 1. Gather the 13 raw inputs from the form
+            # Make sure these match your training data's raw columns
+            age = float(request.form.get("age", 0.0))
+            sex = float(request.form.get("sex", 0.0))
+            cp = float(request.form.get("cp", 0.0))
+            trestbps = float(request.form.get("trestbps", 0.0))
+            chol = float(request.form.get("chol", 0.0))
+            fbs = float(request.form.get("fbs", 0.0))
+            restecg = float(request.form.get("restecg", 0.0))
             thalach = float(request.form.get("thalach", 0.0))
-            thalach_exang = float(request.form.get("thalach_exang", 0.0))
-            
-            thal_3_0 = float(request.form.get("thal_3_0", 0.0))
+            exang = float(request.form.get("exang", 0.0))
+            oldpeak = float(request.form.get("oldpeak", 0.0))
+            slope = float(request.form.get("slope", 0.0))
+            ca = float(request.form.get("ca", 0.0))
+            thal = float(request.form.get("thal", 0.0))
 
-            # making prediction
-            sample = np.array([[ca_0_0, thal_7_0, cp_4_0, asymptomatic_chest_pain,
-                                age_sex, combined_risk_score, oldpeak, thalach,
-                                thalach_exang, thal_3_0]])
-            prediction = model.predict(sample)[0]
-            probability = model.predict_proba(sample)[0, 1]
+            # 2. Create a single-row DataFrame with these raw features
+            patient_df = pd.DataFrame([{
+                'age': age,
+                'sex': sex,
+                'cp': cp,
+                'trestbps': trestbps,
+                'chol': chol,
+                'fbs': fbs,
+                'restecg': restecg,
+                'thalach': thalach,
+                'exang': exang,
+                'oldpeak': oldpeak,
+                'slope': slope,
+                'ca': ca,
+                'thal': thal
+            }])
 
-            # More detailed risk assessment
+            print("[DEBUG] Raw patient data:\n", patient_df)
+
+            # 3. Engineer additional features
+            patient_df = engineer_features(patient_df)
+            print("[DEBUG] After feature engineering:\n", patient_df)
+
+            # 4. Apply preprocessor and selector
+            processed = preprocessor.transform(patient_df)
+            selected = selector.transform(processed)
+            print("[DEBUG] Processed shape:", processed.shape)
+            print("[DEBUG] Selected shape:", selected.shape)
+
+            # 5. Predict with the final model
+            prediction = model.predict(selected)[0]
+            probability = model.predict_proba(selected)[0, 1]
+
+            print("[DEBUG] prediction:", prediction)
+            print("[DEBUG] probability:", probability)
+
+            # Convert numeric prediction to text
             mi_risk = "High Risk" if prediction == 1 else "Low Risk"
             prob_percentage = f"{probability:.2%}"
 
+            # Render the results
             return render_template(
                 "index.html",
                 submitted=True,
@@ -51,14 +116,14 @@ def predict():
                 probability=prob_percentage
             )
         except Exception as e:
-            print(e)
+            print("[DEBUG] Error during prediction:", e)
             return render_template(
                 "index.html",
                 submitted=False,
-                error="Error: Please ensure all fields contain valid numerical values and try again."
+                error="Error: Please ensure all fields are valid numeric values."
             )
 
-    # if GET, just render the blank form
+    # If GET, just render the blank form
     return render_template("index.html", submitted=False)
 
 if __name__ == "__main__":
