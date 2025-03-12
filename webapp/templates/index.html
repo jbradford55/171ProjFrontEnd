@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Myocardial Infarction Risk Predictor</title>
+  <!-- using bootstrap 5.3 for styling with dark mode support -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  >
+  <!-- Bootstrap icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- link to external stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <!-- modern navbar with theme toggle -->
+  <nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <i class="bi bi-heart-pulse-fill me-2"></i>MI Risk Predictor
+      </a>
+      <div class="ms-auto">
+        <button id="theme-toggle" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-moon-fill"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8 col-sm-12">
+        
+        <!-- main heading -->
+        <div class="text-center mb-4">
+          <h1 class="display-5 fw-bold">MI Risk Predictor</h1>
+          <p class="lead">Enter your details to assess your risk of Myocardial Infarction</p>
+          <p class="text-muted small">Note: This tool is for informational purposes only and should not replace professional medical advice.</p>
+        </div>
+        
+        <!-- Results section - only shown after form submission -->
+        {% if submitted %}
+        <div class="card shadow-sm mb-4 border-0 rounded-4">
+          <div class="card-body p-4">
+            <h3 class="card-title fw-bold">Results</h3>
+            <hr>
+            <div class="result-container p-3 rounded-3 mb-3">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <i class="bi 
+                    {% if prediction == 'High Risk' %}
+                      bi-exclamation-triangle-fill text-danger
+                    {% else %}
+                      bi-check-circle-fill text-success
+                    {% endif %} fs-1"></i>
+                </div>
+                <div class="col">
+                  <p class="mb-0">
+                    <strong>MI Risk Level:</strong> 
+                    <span class="result-value 
+                      {% if prediction == 'High Risk' %}
+                        high-risk
+                      {% else %}
+                        low-risk
+                      {% endif %}">
+                      {{ prediction }}
+                    </span>
+                  </p>
+                  <p class="mb-0">
+                    <strong>MI Probability:</strong> 
+                    <span class="result-value">{{ probability }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="alert alert-info mt-3 rounded-3 border-0">
+              <p class="mb-0"><strong>Understanding Your Results:</strong></p>
+              <p class="mb-0">The MI (Myocardial Infarction) probability indicates your risk level. A higher probability means a greater likelihood of experiencing a heart attack.</p>
+              <p class="mb-0 mt-2">Please consult with a healthcare provider to properly interpret these results and discuss appropriate preventive measures.</p>
+            </div>
+            
+            <hr>
+            <a href="/" class="btn btn-primary w-100 rounded-pill">Make Another Prediction</a>
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Error message if any -->
+        {% if error %}
+        <div class="alert alert-danger rounded-3 border-0 mb-4">
+          {{ error }}
+        </div>
+        {% endif %}
+        
+        <!-- Input form - always shown, but below results if they exist -->
+        <div class="card shadow-sm border-0 rounded-4">
+          <div class="card-body p-4">
+            <h3 class="card-title fw-bold">Patient Information</h3>
+            <p class="text-muted">All fields are required. Enter values as provided by your medical tests.</p>
+            <hr>
+
+            <form method="POST">
+              <!-- 1. age -->
+              <div class="mb-4">
+                <label for="age" class="form-label fw-medium">
+                  Age (years)
+                </label>
+                <input 
+                  type="number"
+                  class="form-control form-control-lg"
+                  name="age"
+                  id="age"
+                  placeholder="e.g., 55"
+                  required
+                >
+                <div class="form-text">Patient's age in years.</div>
+              </div>
+
+              <!-- 2. sex -->
+              <div class="mb-4">
+                <label class="form-label fw-medium">
+                  Sex (0=female, 1=male)
+                </label>
+                <div class="d-flex">
+                  <div class="form-check me-3">
+                    <input 
+                      type="radio"
+                      class="form-check-input"
+                      name="sex"
+                      id="sex_male"
+                      value="1"
+                      required
+                    >
+                    <label class="form-check-label" for="sex_male">Male (1)</label>
+                  </div>
+                  <div class="form-check">
+                    <input 
+                      type="radio"
+                      class="form-check-input"
+                      name="sex"
+                      id="sex_female"
+                      value="0"
+                    >
+                    <label class="form-check-label" for="sex_female">Female (0)</label>
+                  </div>
+                </div>
+                <div class="form-text">Binary indicator for sex.</div>
+              </div>
+
+              <!-- 3. cp -->
+              <div class="mb-4">
+                <label for="cp" class="form-label fw-medium">
+                  Chest Pain Type
+                </label>
+                <select
+                  class="form-select form-select-lg"
+                  name="cp"
+                  id="cp"
+                  required
+                >
+                  <option value="" disabled selected>Select one</option>
+                  <option value="1">Typical Angina (1)</option>
+                  <option value="2">Atypical Angina (2)</option>
+                  <option value="3">Non-anginal Pain (3)</option>
+                  <option value="4">Asymptomatic (4)</option>
+                </select>
+                <div class="form-text">Numeric codes for chest pain type.</div>
+              </div>
+
+              <!-- 4. trestbps -->
+              <div class="mb-4">
+                <label for="trestbps" class="form-label fw-medium">
+                  Resting Blood Pressure (mm Hg)
+                </label>
+                <input
+                  type="number"
+                  class="form-control form-control-lg"
+                  name="trestbps"
+                  id="trestbps"
+                  placeholder="e.g., 130"
+                  required
+                >
+                <div class="form-text">Resting blood pressure in mm Hg.</div>
+              </div>
+
+              <!-- 5. chol -->
+              <div class="mb-4">
+                <label for="chol" class="form-label fw-medium">
+                  Serum Cholesterol (mg/dl)
+                </label>
+                <input
+                  type="number"
+                  class="form-control form-control-lg"
+                  name="chol"
+                  id="chol"
+                  placeholder="e.g., 250"
+                  required
+                >
+                <div class="form-text">Serum cholesterol in mg/dl.</div>
+              </div>
+
+              <!-- 6. fbs -->
+              <div class="mb-4">
+                <label class="form-label fw-medium">
+                  Fasting Blood Sugar > 120 mg/dl?
+                </label>
+                <div class="d-flex">
+                  <div class="form-check me-3">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="fbs"
+                      id="fbs_yes"
+                      value="1"
+                      required
+                    >
+                    <label class="form-check-label" for="fbs_yes">Yes (1)</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="fbs"
+                      id="fbs_no"
+                      value="0"
+                    >
+                    <label class="form-check-label" for="fbs_no">No (0)</label>
+                  </div>
+                </div>
+                <div class="form-text">Indicates if fasting blood sugar > 120 mg/dl.</div>
+              </div>
+
+              <!-- 7. restecg -->
+              <div class="mb-4">
+                <label for="restecg" class="form-label fw-medium">
+                  Resting ECG Results
+                </label>
+                <select
+                  class="form-select form-select-lg"
+                  name="restecg"
+                  id="restecg"
+                  required
+                >
+                  <option value="" disabled selected>Select one</option>
+                  <option value="0">Normal (0)</option>
+                  <option value="1">ST-T Wave Abnormality (1)</option>
+                  <option value="2">Left Ventricular Hypertrophy (2)</option>
+                </select>
+                <div class="form-text">Diagnostic results from resting ECG.</div>
+              </div>
+
+              <!-- 8. thalach -->
+              <div class="mb-4">
+                <label for="thalach" class="form-label fw-medium">
+                  Maximum Heart Rate (thalach)
+                </label>
+                <input
+                  type="number"
+                  class="form-control form-control-lg"
+                  name="thalach"
+                  id="thalach"
+                  placeholder="e.g., 150"
+                  required
+                >
+                <div class="form-text">Max heart rate achieved during exercise.</div>
+              </div>
+
+              <!-- 9. exang -->
+              <div class="mb-4">
+                <label class="form-label fw-medium">
+                  Exercise-Induced Angina
+                </label>
+                <div class="d-flex">
+                  <div class="form-check me-3">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="exang"
+                      id="exang_yes"
+                      value="1"
+                      required
+                    >
+                    <label class="form-check-label" for="exang_yes">Yes (1)</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="exang"
+                      id="exang_no"
+                      value="0"
+                    >
+                    <label class="form-check-label" for="exang_no">No (0)</label>
+                  </div>
+                </div>
+                <div class="form-text">Angina induced by exercise.</div>
+              </div>
+
+              <!-- 10. oldpeak -->
+              <div class="mb-4">
+                <label for="oldpeak" class="form-label fw-medium">
+                  ST Depression (oldpeak)
+                </label>
+                <input 
+                  type="number" 
+                  step="any" 
+                  class="form-control form-control-lg" 
+                  name="oldpeak" 
+                  id="oldpeak" 
+                  placeholder="e.g., 1.2" 
+                  required
+                >
+                <div class="form-text">ST depression induced by exercise relative to rest.</div>
+              </div>
+
+              <!-- 11. slope -->
+              <div class="mb-4">
+                <label for="slope" class="form-label fw-medium">
+                  Slope of Peak Exercise ST
+                </label>
+                <select
+                  class="form-select form-select-lg"
+                  name="slope"
+                  id="slope"
+                  required
+                >
+                  <option value="" disabled selected>Select one</option>
+                  <option value="1">Upsloping (1)</option>
+                  <option value="2">Flat (2)</option>
+                  <option value="3">Downsloping (3)</option>
+                </select>
+                <div class="form-text">Shape of ST segment during peak exercise.</div>
+              </div>
+
+              <!-- 12. ca -->
+              <div class="mb-4">
+                <label for="ca" class="form-label fw-medium">
+                  Major Vessels Colored by Fluoroscopy (0-3)
+                </label>
+                <input 
+                  type="number"
+                  class="form-control form-control-lg"
+                  name="ca"
+                  id="ca"
+                  placeholder="e.g., 1"
+                  required
+                >
+                <div class="form-text">Number of major vessels colored by fluoroscopy.</div>
+              </div>
+
+              <!-- 13. thal -->
+              <div class="mb-4">
+                <label for="thal" class="form-label fw-medium">
+                  Thalassemia Type
+                </label>
+                <select
+                  class="form-select form-select-lg"
+                  name="thal"
+                  id="thal"
+                  required
+                >
+                  <option value="" disabled selected>Select one</option>
+                  <option value="3">Normal (3)</option>
+                  <option value="6">Fixed Defect (6)</option>
+                  <option value="7">Reversible Defect (7)</option>
+                </select>
+                <div class="form-text">Indicates normal, fixed, or reversible blood flow defect.</div>
+              </div>
+
+              <div class="alert alert-warning mb-4 rounded-3 border-0">
+                <p class="mb-0"><strong>Important Note:</strong> This tool provides an estimate based on available data. Always consult healthcare professionals for proper medical evaluation and advice.</p>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">
+                <i class="bi bi-calculator me-2"></i>Calculate Risk
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-5 py-3 text-center text-muted">
+    <div class="container">
+      <p class="mb-0">© 2025 MI Risk Predictor | For educational purposes only</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript for theme toggle -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const htmlElement = document.documentElement;
+      const themeIcon = themeToggleBtn.querySelector('i');
+      
+      // Check for saved theme preference or use preferred color scheme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        htmlElement.setAttribute('data-bs-theme', savedTheme);
+        updateIcon(savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlElement.setAttribute('data-bs-theme', 'dark');
+        updateIcon('dark');
+      }
+      
+      // Toggle theme on button click
+      themeToggleBtn.addEventListener('click', function() {
+        const currentTheme = htmlElement.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        htmlElement.setAttribute('data-bs-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+      
+      function updateIcon(theme) {
+        if (theme === 'dark') {
+          themeIcon.classList.remove('bi-moon-fill');
+          themeIcon.classList.add('bi-sun-fill');
+        } else {
+          themeIcon.classList.remove('bi-sun-fill');
+          themeIcon.classList.add('bi-moon-fill');
+        }
+      }
+    });
+  </script>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
